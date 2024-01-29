@@ -23,3 +23,7 @@ DBMS &nbsp; : H2 DATABASE  <br>
 - 화면 레이아웃 분리  
 - Exception Handler 처리
 
+<b>2024/01/26</b>
+- 회원가입 화면/기능 구현
+- 로그인 화면/기능 구현(unAuthorizedException 추가)
+- 로그아웃 기능 구현
