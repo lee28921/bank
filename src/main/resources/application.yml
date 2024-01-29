@@ -13,7 +13,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/mybank?serverTimeZone=Asia/Seoul
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: sa
+    username: root
     password: asd1234
     
 #  h2:
@@ -22,3 +22,14 @@ spring:
 #  output:
 #    ansi:
 #      enabled: always
+
+mybatis:
+  mapper-locations:
+  - classpath:mapper/**.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    
+logging:
+  level:
+    org.mybatis: DEBUG

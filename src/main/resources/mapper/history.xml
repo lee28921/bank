@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tenco.bank.repository.interfaces.HistoryRepository">
+	
+	<insert id="insert">
+		insert into history_tb(amount, w_balance, d_balance,
+				w_account_id, d_account_id, created_at)
+                values(#{amount}, #{w_balance}, #{d_balance}, #{w_account_id}, #{d_account_id}, now());
+	</insert>
+	
+	<update id="updateById">
+		update history_tb set 
+		amount = #{amount}, 
+		w_balance = #{w_balance},
+		d_balance = #{d_balance}, 
+		w_account_id = #{w_account_id}, 
+		d_account_id = #{d_account_id}
+		where id = #{id}
+	</update>
+	
+	<delete id="deleteById">
+		delete from history_tb where id = #{id}
+	</delete>
+	
+	<select id="findAllByUserId" resultType="com.tenco.bank.repository.entity.History">
+		select * from history_tb where id = #{id}
+	</select>
+	
+	<select id="findAll" resultType="com.tenco.bank.repository.entity.History">
+		select * from history_tb
+	</select>
+	
+</mapper>
