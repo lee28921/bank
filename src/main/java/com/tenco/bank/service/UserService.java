@@ -1,6 +1,5 @@
 package com.tenco.bank.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +15,7 @@ import com.tenco.bank.repository.interfaces.UserRepository;
 public class UserService {
 	
 	// 생성자 의존 주입 DI
-	@Autowired
+	//@Autowired
 	private UserRepository repository;
 	
 	// Autowired 역할
