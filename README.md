@@ -27,3 +27,9 @@ DBMS &nbsp; : MySQL  <br>
 - 회원가입 화면/기능 구현
 - 로그인 화면/기능 구현(unAuthorizedException 추가)
 - 로그아웃 기능 구현
+
+<b>2024/01/30</b>
+- account DTO 설정
+- 계좌 등록 화면/기능 구현
+- 계좌 목록 화면/기능 구현
+- Define 설정
