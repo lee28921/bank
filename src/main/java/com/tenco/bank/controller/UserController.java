@@ -90,12 +90,9 @@ public class UserController {
 	 * @param SignInFormDto
 	 * @return 추후 account/list 페이지로 이동 예정(todo)
 	 */
-	
 	@PostMapping("/sign-in")
 	public String signInProc(SignInFormDto dto) {
-		
-		// 1. 유효성 검사 
-		
+
 		if(dto.getUsername() == null || dto.getUsername().isEmpty()) {
 			throw new CustomRestfulException("username을 입력하시오", HttpStatus.BAD_REQUEST);
 		}
@@ -103,13 +100,10 @@ public class UserController {
 			throw new CustomRestfulException("password를 입력하시오", HttpStatus.BAD_REQUEST);
 		}
 		
-		// 서비스 호출 예정
 		User user = service.readUser(dto);
 		httpSession.setAttribute("principal", user);
 		
-		// 로그인 완료 --> 페이지 결정(account/list)
-		// todo 수정 예정 (현재 접근 경로 없음)
-		return "redirect:/user/sign-in";
+		return "redirect:/account/list";
 	}
 	
 	@GetMapping("/logout")
@@ -117,5 +111,6 @@ public class UserController {
 		httpSession.invalidate();
 		return "redirect:/user/sign-in";
 	}
+	
 	
 }
