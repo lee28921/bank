@@ -17,7 +17,7 @@
 			    <input type="text" name="wAccountNumber" class="form-control" placeholder="출금 계좌 번호 입력" id="wAccountNumber" value="1111">
 			  </div>
 			  <div class="form-group">
-			    <label for="wAccountPassword">출금 계좌 비밀번호:</label>
+			    <label for="wAccountPassword">출금 계좌 비밀번호 : </label>
 			    <input type="password" name="wAccountPassword" class="form-control" placeholder="출금 계좌 비밀번호 입력" id="wAccountPassword" value="1234">
 			  </div>
 			  <button type="submit" class="btn btn-primary">출금</button>

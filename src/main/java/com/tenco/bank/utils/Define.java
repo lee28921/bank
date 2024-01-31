@@ -22,7 +22,6 @@ public class Define {
 	public static final String NOT_AN_AUTHENTICATED_USER = "인증된 사용자가 아닙니다.";
 	
 	// history
-	public static final String ENTER_YOUR_ACCOUNT = "";
 	
 	
 }
