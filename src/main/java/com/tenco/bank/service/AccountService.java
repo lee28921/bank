@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tenco.bank.dto.AccountSaveFormDto;
 import com.tenco.bank.dto.DepositFormDto;
+import com.tenco.bank.dto.TransferFormDto;
 import com.tenco.bank.dto.WithDrawFormDto;
 import com.tenco.bank.handler.exception.CustomRestfulException;
 import com.tenco.bank.repository.entity.Account;
@@ -123,9 +124,6 @@ public class AccountService {
 		// 2. 사용자 확인
 		accountEntity.checkOwner(principalId);
 		
-		// 3. 계좌 비밀번호 확인
-		accountEntity.checkPassword(dto.getDAccountPassword());
-		
 		// 4. 입금 처리
 		accountEntity.deposit(dto.getAmount());
 		repository.updateById(accountEntity);
@@ -143,6 +141,51 @@ public class AccountService {
 		if(rowResultCount != 1) {
 			throw new CustomRestfulException("정상 처리 되지 않았습니다", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+	
+	public void updateAccountTransferFormDto(TransferFormDto dto,Integer principalId) {
+		// 1. 출금 계좌 존재 여부
+		Account wAccountEntity = repository.findByNumber(dto.getWAccountNumber());
+		if(wAccountEntity == null) {
+			throw new CustomRestfulException("출금 계좌를 확인할 수 없습니다", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		// 2. 입금 계좌 존재 여부
+		Account dAccountEntity = repository.findByNumber(dto.getDAccountNumber());
+		if(dAccountEntity == null) {
+			throw new CustomRestfulException("입금 계좌를 확인할 수 없습니다", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		// 3. 출금 계좌 본인 확인
+		wAccountEntity.checkOwner(principalId);
+		
+		// 4. 출금 계좌 비번 확인
+		wAccountEntity.checkPassword(dto.getPassword());
+		
+		// 5. 출금 계좌 잔액 확인
+		wAccountEntity.checkBalance(dto.getAmount());
+		
+		// 6. 출금 계좌 잔액 수정
+		wAccountEntity.withdraw(dto.getAmount());
+		repository.updateById(wAccountEntity);
+		
+		// 7. 입금 계좌 잔액 수정
+		dAccountEntity.deposit(dto.getAmount());
+		repository.updateById(dAccountEntity);
+		
+		// 8. 거래 내역 등록
+		History history = History.builder()
+							.amount(dto.getAmount())
+							.wAccountId(wAccountEntity.getId())
+							.dAccountId(dAccountEntity.getId())
+							.wBalance(wAccountEntity.getBalance())
+							.dBalance(dAccountEntity.getBalance())
+							.build();
+		
+		int resultRowCount = historyRepository.insert(history);
+		if(resultRowCount != 1) {
+			throw new CustomRestfulException(Define.FAIL_TO_CREATE_ACCOUNT, HttpStatus.INTERNAL_SERVER_ERROR);
+		} 
 	}
 	
 }

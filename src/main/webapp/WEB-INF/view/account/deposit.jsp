@@ -17,10 +17,6 @@
 				    <label for="dAccountNumber">입금 계좌 번호 : </label>
 				    <input type="text" name="dAccountNumber" class="form-control" placeholder="입금 계좌 번호 입력" id="dAccountNumber" value="1111">
 				  </div>
-				  <div class="form-group">
-				    <label for="dAccountPassword">입금 계좌 비밀번호:</label>
-				    <input type="password" name="dAccountPassword" class="form-control" placeholder="입금 계좌 비밀번호 입력" id="dAccountPassword" value="1234">
-				  </div>
 				  <button type="submit" class="btn btn-primary">입금</button>
 				</form>
 			</div>
