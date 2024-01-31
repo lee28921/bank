@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tenco.bank.dto.AccountSaveFormDto;
+import com.tenco.bank.dto.DepositFormDto;
 import com.tenco.bank.dto.WithDrawFormDto;
 import com.tenco.bank.handler.exception.CustomRestfulException;
 import com.tenco.bank.repository.entity.Account;
@@ -83,21 +84,18 @@ public class AccountService {
 			throw new CustomRestfulException(Define.NOT_EXIST_ACCOUNT, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		// 2
-		if(accountEntity.getUserId() != principalId) {
-			throw new CustomRestfulException("본인 소유의 계좌가 아닙니다", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		accountEntity.checkOwner(principalId);
+		
 		// 3 (String) 불변
-		if(accountEntity.getPassword().equals(dto.getWAccountPassword()) == false) {
-			throw new CustomRestfulException("출금 계좌 비밀번호가 틀렸습니다", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		accountEntity.checkPassword(dto.getWAccountPassword());
+		
 		// 4
-		if(accountEntity.getBalance() < dto.getAmount()) {
-			throw new CustomRestfulException("계좌 잔액이 부족합니다", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		accountEntity.checkBalance(dto.getAmount());
+		
 		// 5 --> 출금 기능 --> 객체 상태값 변경
 		accountEntity.withdraw(dto.getAmount());
 		repository.updateById(accountEntity);
-		log.info("5----");
+		
 		// 6
 		History history = new History();
 		history.setAmount(dto.getAmount());
@@ -111,6 +109,40 @@ public class AccountService {
 			throw new CustomRestfulException("정상 처리 되지 않았습니다", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
+	}
+	
+	// 입금 등록
+	@Transactional
+	public void updateAccountDeposit(DepositFormDto dto, Integer principalId) {
+		// 1. 계좌 확인
+		Account accountEntity = repository.findByNumber(dto.getDAccountNumber());
+		if(accountEntity == null) {
+			throw new CustomRestfulException("계좌를 확인할 수 없습니다", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		// 2. 사용자 확인
+		accountEntity.checkOwner(principalId);
+		
+		// 3. 계좌 비밀번호 확인
+		accountEntity.checkPassword(dto.getDAccountPassword());
+		
+		// 4. 입금 처리
+		accountEntity.deposit(dto.getAmount());
+		repository.updateById(accountEntity);
+		
+		// 5. 거래 내역 등록
+		History history = History.builder()
+							.amount(dto.getAmount())
+							.dAccountId(principalId)
+							.wAccountId(null)
+							.dBalance(accountEntity.getBalance())
+							.wBalance(null)
+							.build();
+		
+		int rowResultCount = historyRepository.insert(history);
+		if(rowResultCount != 1) {
+			throw new CustomRestfulException("정상 처리 되지 않았습니다", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 }
