@@ -83,21 +83,18 @@ public class AccountService {
 			throw new CustomRestfulException(Define.NOT_EXIST_ACCOUNT, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		// 2
-		if(accountEntity.getUserId() != principalId) {
-			throw new CustomRestfulException("본인 소유의 계좌가 아닙니다", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		accountEntity.checkOwner(principalId);
+		
 		// 3 (String) 불변
-		if(accountEntity.getPassword().equals(dto.getWAccountPassword()) == false) {
-			throw new CustomRestfulException("출금 계좌 비밀번호가 틀렸습니다", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		accountEntity.checkPassword(dto.getWAccountPassword());
+		
 		// 4
-		if(accountEntity.getBalance() < dto.getAmount()) {
-			throw new CustomRestfulException("계좌 잔액이 부족합니다", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		accountEntity.checkBalance(dto.getAmount());
+		
 		// 5 --> 출금 기능 --> 객체 상태값 변경
 		accountEntity.withdraw(dto.getAmount());
 		repository.updateById(accountEntity);
-		log.info("5----");
+		
 		// 6
 		History history = new History();
 		history.setAmount(dto.getAmount());
