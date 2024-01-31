@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.tenco.bank.dto.AccountSaveFormDto;
+import com.tenco.bank.dto.WithDrawFormDto;
 import com.tenco.bank.handler.exception.CustomRestfulException;
 import com.tenco.bank.handler.exception.UnAuthorizedException;
 import com.tenco.bank.repository.entity.Account;
@@ -69,7 +70,7 @@ public class AccountController {
 			throw new CustomRestfulException(Define.ENTER_YOUR_ACCOUNT_NUMBER, HttpStatus.BAD_REQUEST);
 		}
 		if(dto.getPassword() == null || dto.getPassword().isEmpty()) {
-			throw new CustomRestfulException("계좌 비밀번호를 입력하세요", HttpStatus.BAD_REQUEST);
+			throw new CustomRestfulException(Define.ENTER_YOUR_PASSWORD, HttpStatus.BAD_REQUEST);
 		}
 		if(dto.getBalance() == null || dto.getBalance() < 0) {
 			throw new CustomRestfulException("잘못된 금액 입니다", HttpStatus.BAD_REQUEST);
@@ -106,4 +107,55 @@ public class AccountController {
 		
 		return "account/list";
 	}
+	
+	// 출금 페이지 요청
+	@GetMapping("/withdraw")
+	public String withdrawPage() {
+		// 1. 인증 검사
+		User principal = (User)session.getAttribute(Define.PRINCIPAL);
+		
+		if(principal == null) {
+			throw new UnAuthorizedException(Define.ENTER_YOUR_LOGIN, HttpStatus.UNAUTHORIZED);
+			
+		}
+		
+		return "account/withdraw";
+	}
+	
+	// 출금 요청 로직 만들기
+	@PostMapping("/withdraw")
+	public String withdrawProc(WithDrawFormDto dto) {
+		// 1. 인증 검사
+		User principal = (User)session.getAttribute(Define.PRINCIPAL);
+		
+		if(principal == null) {
+			throw new UnAuthorizedException(Define.ENTER_YOUR_LOGIN, HttpStatus.UNAUTHORIZED);
+			
+		}
+		
+		// 유효성 검사
+		if(dto.getAmount() == null) {
+			throw new CustomRestfulException(Define.ENTER_YOUR_ACCOUNT, 
+					HttpStatus.BAD_REQUEST);
+		}
+		// <= 0
+		if(dto.getAmount().longValue() < 0) {
+			throw new CustomRestfulException("0 이상", 
+					HttpStatus.BAD_REQUEST);
+		}
+		if(dto.getWAccountNumber() == null) {
+			throw new CustomRestfulException("계좌 번호를 입력하세요", 
+					HttpStatus.BAD_REQUEST);
+		}
+		if(dto.getWAccountPassword() == null) {
+			throw new CustomRestfulException("계좌 비밀번호를 입력하세요", 
+					HttpStatus.BAD_REQUEST);
+		}
+		
+		// 서비스 호출
+		accountService.updateAccountWithdraw(dto, principal.getId());
+		
+		return "redirect:/account/list";
+	}
+	
 }

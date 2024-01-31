@@ -4,18 +4,17 @@
 <mapper namespace="com.tenco.bank.repository.interfaces.HistoryRepository">
 	
 	<insert id="insert">
-		insert into history_tb(amount, w_balance, d_balance,
-				w_account_id, d_account_id, created_at)
-                values(#{amount}, #{w_balance}, #{d_balance}, #{w_account_id}, #{d_account_id}, now());
+		insert into history_tb(amount, w_balance, d_balance, w_account_id, d_account_id, created_at)
+                values(#{amount}, #{wBalance}, #{dBalance}, #{wAccountId}, #{dAccountId}, now());
 	</insert>
 	
 	<update id="updateById">
 		update history_tb set 
 		amount = #{amount}, 
-		w_balance = #{w_balance},
-		d_balance = #{d_balance}, 
-		w_account_id = #{w_account_id}, 
-		d_account_id = #{d_account_id}
+		w_balance = #{wBalance},
+		d_balance = #{dBalance}, 
+		w_account_id = #{wAccountId}, 
+		d_account_id = #{dAccountId}
 		where id = #{id}
 	</update>
 	

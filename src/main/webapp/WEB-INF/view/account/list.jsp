@@ -9,7 +9,7 @@
 			
 			<c:choose>
 				<c:when test="${accountList != null}">
-					<table class="stable-hover">
+					<table class="table table-hover">
 						<thead>
 							<tr>
 								<td>계좌 번호</td>

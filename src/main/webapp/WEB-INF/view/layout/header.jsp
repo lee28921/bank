@@ -33,6 +33,9 @@
       		<li class="nav-item">
 		    	<a class="nav-link" href="/user/logout">로그아웃</a>
 		    </li>    
+		    <li class="nav-item">
+		    	<p style="color: white; margin: 8px 5px;">${principal.username} 님, 반갑습니다</p>
+		    </li>  
       	</c:when>
       	<c:otherwise>
       		<li class="nav-item">
@@ -64,7 +67,7 @@
           <a class="nav-link" href="/account/list">계좌 목록</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">출금</a>
+          <a class="nav-link" href="/account/withdraw">출금</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="#">입금</a>
