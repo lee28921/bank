@@ -13,12 +13,12 @@ import com.tenco.bank.dto.TransferFormDto;
 import com.tenco.bank.dto.WithDrawFormDto;
 import com.tenco.bank.handler.exception.CustomRestfulException;
 import com.tenco.bank.repository.entity.Account;
+import com.tenco.bank.repository.entity.CustomHistoryEntity;
 import com.tenco.bank.repository.entity.History;
 import com.tenco.bank.repository.interfaces.AccountRepository;
 import com.tenco.bank.repository.interfaces.HistoryRepository;
 import com.tenco.bank.utils.Define;
 
-import lombok.Builder;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -144,36 +144,33 @@ public class AccountService {
 	}
 	
 	public void updateAccountTransferFormDto(TransferFormDto dto,Integer principalId) {
-		// 1. 출금 계좌 존재 여부
+		
 		Account wAccountEntity = repository.findByNumber(dto.getWAccountNumber());
 		if(wAccountEntity == null) {
 			throw new CustomRestfulException("출금 계좌를 확인할 수 없습니다", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
-		// 2. 입금 계좌 존재 여부
 		Account dAccountEntity = repository.findByNumber(dto.getDAccountNumber());
 		if(dAccountEntity == null) {
 			throw new CustomRestfulException("입금 계좌를 확인할 수 없습니다", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
-		// 3. 출금 계좌 본인 확인
 		wAccountEntity.checkOwner(principalId);
 		
-		// 4. 출금 계좌 비번 확인
 		wAccountEntity.checkPassword(dto.getPassword());
 		
-		// 5. 출금 계좌 잔액 확인
 		wAccountEntity.checkBalance(dto.getAmount());
 		
-		// 6. 출금 계좌 잔액 수정
 		wAccountEntity.withdraw(dto.getAmount());
-		repository.updateById(wAccountEntity);
+		int withDrawResult = repository.updateById(wAccountEntity);
 		
-		// 7. 입금 계좌 잔액 수정
 		dAccountEntity.deposit(dto.getAmount());
-		repository.updateById(dAccountEntity);
+		int depositResult = repository.updateById(dAccountEntity);
 		
-		// 8. 거래 내역 등록
+		if(withDrawResult != 1 && depositResult != 1) {
+			throw new CustomRestfulException("test", HttpStatus.BAD_REQUEST);
+		}
+		
 		History history = History.builder()
 							.amount(dto.getAmount())
 							.wAccountId(wAccountEntity.getId())
@@ -186,6 +183,21 @@ public class AccountService {
 		if(resultRowCount != 1) {
 			throw new CustomRestfulException(Define.FAIL_TO_CREATE_ACCOUNT, HttpStatus.INTERNAL_SERVER_ERROR);
 		} 
+	}
+	
+	/**
+	 * 단일 계좌 거래 내역 검색
+	 * @param type = [all, deposit, withdraw]
+	 * @param id (account_id)
+	 * @return 동적 쿼리 - List
+	 */
+	public List<CustomHistoryEntity> readHistoryListByAccount(String type, Integer id) {
+		return historyRepository.findByIdHistoryType(type, id);
+	}
+	
+	// 단일 계좌 조회 - AccountById
+	public Account ReadByAccountId(Integer id) {
+		return repository.findByAccountId(id);
 	}
 	
 }
