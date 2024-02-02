@@ -8,6 +8,7 @@ framework &nbsp; : Spring boot 3.1.8  <br>
 Language &nbsp; : java 17, CSS, JSP<br>
 DBMS &nbsp; : MySQL  <br>
 
+
 ---
 <b>2024/01/24</b>
 - 프로젝트 생성  
@@ -37,3 +38,7 @@ DBMS &nbsp; : MySQL  <br>
 <b>2024/02/01</b>
 - 계좌 상세 내역 화면/기능 구현 <br>
  &nbsp;- 계좌 상세 내역 정렬 기능 추가
+
+<b>2024/02/02</b>
+- 인터셉터 로그인 처리
+- 비밀번호 암호화
