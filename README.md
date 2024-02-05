@@ -45,4 +45,4 @@ DBMS &nbsp; : MySQL  <br>
 
 <b>2024/02/05</b>
 - 파일 업로드
-- server to server 구현
+- server to server 테스트 구현
