@@ -1,17 +1,23 @@
 package com.tenco.bank.controller;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.tenco.bank.dto.SignInFormDto;
 import com.tenco.bank.dto.SignUpFormDto;
 import com.tenco.bank.handler.exception.CustomRestfulException;
 import com.tenco.bank.repository.entity.User;
 import com.tenco.bank.service.UserService;
+import com.tenco.bank.utils.Define;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -49,6 +55,8 @@ public class UserController {
 	@PostMapping("/sign-up")
 	public String signProc(SignUpFormDto dto) {
 		
+		System.out.println("dto : "+dto.toString());
+		System.out.println(dto.getFile().getOriginalFilename());
 		// 1. 인증검사 x
 		// 2. 유효성 검사
 		if(dto.getUsername() == null || dto.getUsername().isEmpty()) {
@@ -64,6 +72,46 @@ public class UserController {
 		if(dto.getFullname() == null || dto.getFullname().isEmpty()) {
 			throw new CustomRestfulException("fullname을 입력하세요", 
 					HttpStatus.BAD_REQUEST);
+		}
+		
+		// 파일 업로드
+		MultipartFile file = dto.getFile();
+		if(file.isEmpty() == false) {
+			// 사용자가 이미지를 업로드 했다면 기능 구현
+			
+			// 파일 사이즈 체크
+			// 20MB
+			if(file.getSize() > Define.MAX_FILE_SIZE) {
+				throw new CustomRestfulException("파일 크기는 20MB 이상 클 수는 없습니다", HttpStatus.BAD_REQUEST);
+			}
+			
+			// 서버 컴퓨터에 파일 넣을 디렉토리가 있는 지 검사
+			String saveDirectory = Define.UPLOAD_FILEDERECTORY;
+			// 폴더가 없다면 오류 발생(파일 생성시)
+			File dir = new File(saveDirectory);
+			if(dir.exists() == false) {
+				dir.mkdir(); // 폴더가 없으면 폴더 생성
+			}
+			
+			// 파일 이름 (중복 처리 예방)
+			UUID uuid = UUID.randomUUID();
+			String fileName = uuid + "_" + file.getOriginalFilename();
+			System.out.println("fileName : "+fileName);
+			
+			// C:\\wok_spring\\upload\(파일 이름).png
+			String uploadtPath = Define.UPLOAD_FILEDERECTORY + File.separator + fileName;
+			File destination = new File(uploadtPath);
+			
+			try {
+				file.transferTo(destination);
+			} catch (IllegalStateException | IOException e) {
+				e.printStackTrace();
+			}
+			
+			// 객체 상태 변경
+			dto.setOriginFileName(file.getOriginalFilename());
+			dto.setUploadFileName(fileName);
+			
 		}
 		
 		service.createUser(dto);
