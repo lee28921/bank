@@ -4,6 +4,10 @@ public class Define {
 	
 	public static final String PRINCIPAL  = "principal";
 	
+	// 이미지 관련 
+	public static final String UPLOAD_FILEDERECTORY = "C:\\wok_spring\\upload";
+	public static final int MAX_FILE_SIZE = 1024 * 1024 * 20; // 20MB
+	
 	//  Account
 	public static final String EXIST_ACCOUNT = "이미 계좌가 존재합니다.";
 	public static final String NOT_EXIST_ACCOUNT = "존재하는 계좌가 없습니다.";

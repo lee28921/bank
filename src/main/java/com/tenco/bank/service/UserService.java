@@ -39,6 +39,8 @@ public class UserService {
 		User user = User.builder()
 				.username(dto.getUsername())
 				.password(passwordEncoder.encode(dto.getPassword()))
+				.originFileName(dto.getOriginFileName())
+				.uploadFileName(dto.getUploadFileName())
 				.fullname(dto.getFullname())
 				.build();
 		

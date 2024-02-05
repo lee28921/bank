@@ -19,4 +19,13 @@ public class User {
 	private String password;
 	private String fullname;
 	private Timestamp createdAt;
+
+	private String originFileName;
+	private String uploadFileName;
+	
+	// 사용자가 회원가입시, 이미지, 이미지 x
+	public String setupUserImage() {
+		return uploadFileName == null ?
+				"https://picsm.phtos/id/1/350" : "/images/upload/" + uploadFileName;
+	}
 }
