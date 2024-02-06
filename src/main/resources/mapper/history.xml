@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tenco.bank.repository.interfaces.HistoryRepository">
+	
+	<insert id="insert">
+		insert into history_tb(amount, w_balance, d_balance, w_account_id, d_account_id, created_at)
+                values(#{amount}, #{wBalance}, #{dBalance}, #{wAccountId}, #{dAccountId}, now());
+	</insert>
+	
+	<update id="updateById">
+		update history_tb set 
+		amount = #{amount}, 
+		w_balance = #{wBalance},
+		d_balance = #{dBalance}, 
+		w_account_id = #{wAccountId}, 
+		d_account_id = #{dAccountId}
+		where id = #{id}
+	</update>
+	
+	<delete id="deleteById">
+		delete from history_tb where id = #{id}
+	</delete>
+	
+	<select id="findAllByUserId" resultType="com.tenco.bank.repository.entity.History">
+		select * from history_tb where id = #{id}
+	</select>
+	
+	<select id="findAll" resultType="com.tenco.bank.repository.entity.CustomHistoryEntity">
+		select * from history_tb
+	</select>
+	
+	<select id="findByIdHistoryType" resultType="com.tenco.bank.repository.entity.CustomHistoryEntity">
+	
+		<!-- 출금 조회 -->
+		<if test="type == 'withdraw'">
+			select h.id, h.amount,
+			case when h.w_account_id = #{id} then (h.w_balance)
+			     when h.d_account_id = #{id} then (h.d_balance) 
+			     end as balance, 
+			     ifnull(wa.number, 'ATM') as sender, 
+			     ifnull(da.number, 'ATM') as receiver, 
+			     h.created_at
+			from history_tb as h 
+			left join account_tb as da 
+			on h.d_account_id = da.id 
+			left join account_tb as wa 
+			on h.w_account_id = wa.id 
+			where h.w_account_id = #{id}
+		</if>
+		
+		<!-- 입금 조회 -->
+		<if test="type == 'deposit'">
+			select h.id, h.amount,
+			case when h.w_account_id = #{id} then (h.w_balance)
+			     when h.d_account_id = #{id} then (h.d_balance) 
+			     end as balance, 
+			     ifnull(wa.number, 'ATM') as sender, 
+			     ifnull(da.number, 'ATM') as receiver, 
+			     h.created_at
+			from history_tb as h 
+			left join account_tb as da 
+			on h.d_account_id = da.id 
+			left join account_tb as wa 
+			on h.w_account_id = wa.id 
+			where h.d_account_id = #{id} 
+		</if>
+		
+		<!-- 전체 조회 -->
+		<if test="type == 'all'">
+			select h.id, h.amount,
+			case when h.w_account_id = #{id} then (h.w_balance)
+			     when h.d_account_id = #{id} then (h.d_balance) 
+			     end as balance, 
+			     ifnull(wa.number, 'ATM') as sender, 
+			     ifnull(da.number, 'ATM') as receiver, 
+			     h.created_at
+			from history_tb as h 
+			left join account_tb as da 
+			on h.d_account_id = da.id 
+			left join account_tb as wa 
+			on h.w_account_id = wa.id 
+			where h.d_account_id = #{id} or h.w_account_id = #{id}
+		</if>
+	</select>
+</mapper>
