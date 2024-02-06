@@ -13,7 +13,10 @@
   	height: 200px;
   	
   }
-  
+.btn--naver {
+	width: 90px;
+	height: 45px;
+}
 /* 계좌 상세보기 */
 .detail .detail--bg {
 	padding: 20px;

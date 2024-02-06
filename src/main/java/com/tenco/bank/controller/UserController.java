@@ -19,10 +19,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.tenco.bank.dto.KakaoProfile;
+import com.tenco.bank.dto.NaverProfile;
 import com.tenco.bank.dto.OauthToken;
 import com.tenco.bank.dto.SignInFormDto;
 import com.tenco.bank.dto.SignUpFormDto;
@@ -45,6 +47,15 @@ public class UserController {
 	
 	@Autowired
 	private HttpSession httpSession;
+	
+	// 카카오 Rest Key
+	@Value("${spring.security.oauth2.client.registration.kakao.client-id}")
+	private String KakaoRestKey;
+	
+	// 카카오 리다이렉트 uri
+	@Value("${spring.security.oauth2.client.registration.kakao.redirect-uri}")
+	private String KakaoRedirectUri;
+	
 	
 	/**
 	 * 회원 가입 페이지 요청
@@ -143,7 +154,6 @@ public class UserController {
 	// http://localhost:80/user/sign-in
 	@GetMapping("/sign-in")
 	public String signInPage() {
-		log.info("KakaoRestKey : "+KakaoRestKey+", KakaoRedirectUri : "+KakaoRedirectUri);
 		
 		return "user/signIn";
 	}
@@ -175,14 +185,6 @@ public class UserController {
 		httpSession.invalidate();
 		return "redirect:/user/sign-in";
 	}
-	
-	// Rest Key
-	@Value("${spring.security.oauth2.client.registration.kakao.client-id}")
-	private String KakaoRestKey;
-	
-	// 리다이렉트 uri
-	@Value("${spring.security.oauth2.client.registration.kakao.redirect-uri}")
-	private String KakaoRedirectUri;
 	
 	// http://lcoalhost:80/user/kakao-callback?code="{카카오 코드}"
 	@GetMapping("/kakao-callback")
@@ -247,6 +249,52 @@ public class UserController {
 		// 로그인 처리
 		httpSession.setAttribute(Define.PRINCIPAL, oldUser);
 		
+		return "redirect:/account/list";
+	}
+	
+	@GetMapping("/naver-callback")
+	public String naverCallback(@RequestParam String code) {
+		// POST 방식, Header 구성, body 구성
+		RestTemplate rt2 = new RestTemplate();
+		// 헤더 구성
+		HttpHeaders headers2 = new HttpHeaders();
+		headers2.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+		headers2.add("Authorization", "Bearer "+ 
+		"AAAAOZ8wp9OngROaP2QoZZJ8anbmQLGRbmX_XET0YgyUUJHxggP53gUN5NXjTvW0zivT8eNT3PvjY6OFsVN9GMpF2xk");
+		
+		// 바디 x
+		
+		// 결합
+		HttpEntity<MultiValueMap<String, String>> naverInfo 
+		= new HttpEntity<>(headers2);
+		
+		ResponseEntity<NaverProfile> response = rt2.exchange("https://openapi.naver.com/v1/nid/me", 
+				HttpMethod.POST, naverInfo, NaverProfile.class);
+		
+		NaverProfile naverProfile = response.getBody();
+		
+		// 로그인 후 처리
+		SignUpFormDto dto = SignUpFormDto.builder()
+				.username("OAuth_"+ naverProfile.response.getNickname())
+				.fullname("naver")
+				.password("asd1234")
+				.originFileName(naverProfile.response.getProfileImage())
+				.build();
+		
+		// oldUser 객체 선언(안하면 null로 받게 됨)
+		User oldUser = new User();
+		
+		oldUser = service.readUserByUserName(dto.getUsername()); // 조회
+		if(oldUser == null) {
+			service.createUser(dto);
+			///////////////////////////
+			oldUser.setUsername(dto.getUsername());
+			oldUser.setFullname(dto.getFullname());
+		}
+		oldUser.setPassword(null);
+		// 로그인 처리
+		httpSession.setAttribute(Define.PRINCIPAL, oldUser);
+				
 		return "redirect:/account/list";
 	}
 }
