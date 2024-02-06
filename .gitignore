@@ -36,6 +36,8 @@ out/
 ### VS Code ###
 .vscode/
 
+### application.yml ###
+*.yml
 
 # Created by https://www.toptal.com/developers/gitignore/api/java,macos,eclipse
 # Edit at https://www.toptal.com/developers/gitignore?templates=java,macos,eclipse
